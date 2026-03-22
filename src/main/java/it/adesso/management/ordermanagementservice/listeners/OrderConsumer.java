@@ -2,6 +2,7 @@ package it.adesso.management.ordermanagementservice.listeners;
 
 import com.google.gson.Gson;
 import it.adesso.management.ordermanagementservice.DTOs.ReceivingEventDTO;
+import it.adesso.management.ordermanagementservice.enums.OrderStatusEnum;
 import it.adesso.management.ordermanagementservice.services.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,9 @@ public class OrderConsumer {
             log.info("Received event for order: {} with event: {}", receivedEventDTO.getOrderId(), receivedEventDTO.getEvent());
             switch (receivedEventDTO.getEvent()) {
                 case CREATE -> this.orderService.createOrder(receivedEventDTO.getOrderId(), receivedEventDTO.getOrder());
+                case UPDATE_PAYED -> this.orderService.saveStatusByExternalId(receivedEventDTO.getOrderId(), OrderStatusEnum.PAYED);
+                case UPDATE -> this.orderService.updateOrder(receivedEventDTO.getOrderId(), receivedEventDTO.getOrder());
+                case DELETE -> this.orderService.deleteOrder(receivedEventDTO.getOrderId());
             }
         };
     }

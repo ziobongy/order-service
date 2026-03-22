@@ -1,19 +1,15 @@
 package it.adesso.management.ordermanagementservice.DTOs;
 
-import jakarta.validation.constraints.NotNull;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-import java.util.Set;
+import java.util.List;
 
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 public class OrderDTO {
     private Long id;
-    private Long idPizza;
-    private Long idBase;
-    @NotNull
-    private Set<Long> addedIngredients;
-    @NotNull
-    private Set<Long> removedIngredients;
+    private List<OrderEntryDTO> entries;
 }

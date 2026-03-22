@@ -1,14 +1,19 @@
 package it.adesso.management.ordermanagementservice.entities.orders;
 
-import it.adesso.management.ordermanagementservice.entities.external.Basis;
-import it.adesso.management.ordermanagementservice.entities.external.ComposedPizza;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.constraints.NotNull;
+import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 
+import java.time.Instant;
+import java.util.Set;
+
+@Builder
 @Getter
 @Setter
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "orders")
 public class Order {
     @Id
@@ -16,13 +21,27 @@ public class Order {
     @Column(name = "id", nullable = false)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_pizza")
-    private ComposedPizza idPizza;
+    @NotNull
+    @Column(name = "external_id", nullable = false)
+    private Long externalId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "base")
-    private Basis base;
+    @NotNull
+    @Column(name = "placed_by", nullable = false)
+    private String placedBy;
 
+    @NotNull
+    @Column(name = "status", nullable = false)
+    private String status;
+
+    @Column(name = "charged_by", nullable = true)
+    private String chargedBy;
+
+    @OneToMany(mappedBy = "order", fetch = FetchType.EAGER)
+    private Set<OrderEntry> entries;
+
+    @NotNull
+    @ColumnDefault("now()")
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
 
 }

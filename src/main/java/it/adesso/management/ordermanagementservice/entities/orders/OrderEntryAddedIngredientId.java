@@ -3,21 +3,22 @@ package it.adesso.management.ordermanagementservice.entities.orders;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import jakarta.validation.constraints.NotNull;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.io.Serializable;
 
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @EqualsAndHashCode
 @Embeddable
-public class OrderAddedIngredientId implements Serializable {
-    private static final long serialVersionUID = 7929992032919597808L;
+public class OrderEntryAddedIngredientId implements Serializable {
+    private static final long serialVersionUID = -8493145296708052628L;
     @NotNull
-    @Column(name = "\"order\"", nullable = false)
-    private Long order;
+    @Column(name = "order_entry", nullable = false)
+    private Long orderEntry;
 
     @NotNull
     @Column(name = "ingredient", nullable = false)
