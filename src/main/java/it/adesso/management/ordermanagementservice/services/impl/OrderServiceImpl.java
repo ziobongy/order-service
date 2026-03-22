@@ -45,6 +45,9 @@ import java.util.Set;
 @Service
 public class OrderServiceImpl implements OrderService {
 
+    private static final String ORCHESTRATOR_BINDING_NAME = "orderOrchestrationService-out-0";
+    private static final String ORCHESTRATOR_ERROR_BINDING_NAME = "orderOrchestrationServiceError-out-0";
+
     private final OrderBFFMapper orderMapper;
     private final QueueService queueService;
     private final JwtUtilService jwtUtilService;
@@ -78,7 +81,16 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderBffDTO findById(Long externalId) {
         Order order = this.orderRepository.findByExternalId(externalId).orElseThrow(
-            () -> new NotFoundException("Order not found with id: " + externalId)
+                () -> {
+                    this.queueService.sendMessage(
+                            ORCHESTRATOR_ERROR_BINDING_NAME,
+                            SendingEventDTO.builder()
+                                    .orderId(externalId)
+                                    .message("Order not found with id: " + externalId)
+                                    .build()
+                    );
+                    return new NotFoundException("Order not found with external id: " + externalId);
+                }
         );
         return this.orderMapper.toOrderEntry(order);
     }
@@ -115,7 +127,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         this.queueService.sendMessage(
-            "orderOrchestrationService-out-0",
+            ORCHESTRATOR_BINDING_NAME,
             SendingEventDTO.builder()
                 .orderId(extenalId)
                 .event(OrderSendingEventEnum.CREATED).build()
@@ -126,7 +138,16 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void updateOrder(Long externalId, OrderDTO orderDTO) {
         Order order = this.orderRepository.findByExternalId(externalId).orElseThrow(
-            () -> new NotFoundException("Order not found")
+            () -> {
+                this.queueService.sendMessage(
+                    ORCHESTRATOR_ERROR_BINDING_NAME,
+                    SendingEventDTO.builder()
+                        .orderId(externalId)
+                        .message("Order not found with id: " + externalId)
+                        .build()
+                );
+                return new NotFoundException("Order not found");
+            }
         );
         order.setStatus(OrderStatusEnum.UNDER_EDITING.getName());
         this.orderRepository.save(order);
@@ -175,7 +196,7 @@ public class OrderServiceImpl implements OrderService {
         }
 
         this.queueService.sendMessage(
-            "orderOrchestrationService-out-0",
+            ORCHESTRATOR_BINDING_NAME,
             SendingEventDTO.builder()
                 .orderId(externalId)
                 .event(OrderSendingEventEnum.EDITED).build()
@@ -186,7 +207,16 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void deleteOrder(Long externalId) {
         Order order = this.orderRepository.findByExternalId(externalId).orElseThrow(
-            () -> new NotFoundException("Order not found with external id: " + externalId)
+            () -> {
+                this.queueService.sendMessage(
+                    ORCHESTRATOR_ERROR_BINDING_NAME,
+                    SendingEventDTO.builder()
+                        .orderId(externalId)
+                        .message("Order not found with id: " + externalId)
+                        .build()
+                );
+                return new NotFoundException("Order not found with external id: " + externalId);
+            }
         );
         
         // Elimina tutti gli ingredienti associati alle entries
@@ -210,7 +240,7 @@ public class OrderServiceImpl implements OrderService {
         
         // Invia evento di eliminazione alla coda
         this.queueService.sendMessage(
-            "orderOrchestrationService-out-0",
+            ORCHESTRATOR_BINDING_NAME,
             SendingEventDTO.builder()
                 .orderId(externalId)
                 .event(OrderSendingEventEnum.DELETED).build()
@@ -220,13 +250,22 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void takeCharge(Long externalId) {
         Order order = this.orderRepository.findByExternalId(externalId).orElseThrow(
-            () -> new NotFoundException("Order not found with external id: " + externalId)
+            () -> {
+                this.queueService.sendMessage(
+                    ORCHESTRATOR_ERROR_BINDING_NAME,
+                    SendingEventDTO.builder()
+                        .orderId(externalId)
+                        .message("Order not found with id: " + externalId)
+                        .build()
+                );
+                return new NotFoundException("Order not found with external id: " + externalId);
+            }
         );
         order.setStatus(OrderStatusEnum.CHARGED.getName());
         order.setChargedBy(this.jwtUtilService.getUserIdentifier());
         this.orderRepository.save(order);
          this.queueService.sendMessage(
-            "orderOrchestrationService-out-0",
+             ORCHESTRATOR_BINDING_NAME,
             SendingEventDTO.builder()
                 .orderId(externalId)
                 .event(OrderSendingEventEnum.CHARGED).build()
@@ -235,7 +274,16 @@ public class OrderServiceImpl implements OrderService {
 
     public void saveStatusByExternalId(Long externalId, OrderStatusEnum status) {
         Order order = this.orderRepository.findByExternalId(externalId).orElseThrow(
-            () -> new NotFoundException("Order not found with external id: " + externalId)
+                () -> {
+                    this.queueService.sendMessage(
+                            ORCHESTRATOR_ERROR_BINDING_NAME,
+                            SendingEventDTO.builder()
+                                    .orderId(externalId)
+                                    .message("Order not found with id: " + externalId)
+                                    .build()
+                    );
+                    return new NotFoundException("Order not found with external id: " + externalId);
+                }
         );
         order.setStatus(status.getName());
         this.orderRepository.save(order);

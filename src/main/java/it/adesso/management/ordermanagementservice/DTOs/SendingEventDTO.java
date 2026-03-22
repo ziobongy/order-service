@@ -11,4 +11,5 @@ import lombok.Setter;
 public class SendingEventDTO {
     private Long orderId;
     private OrderSendingEventEnum event;
+    private String message;
 }

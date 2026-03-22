@@ -17,7 +17,7 @@ spring:
           destination: orders-orchestration-service
           group: queue
         orderOrchestrationServiceError-out-0:
-          destination: orders-orchestration-service-rror
+          destination: orders-orchestration-service-error
           group: queue
 
         #queste sono le code a cui mi sottoscrivo per ricevere l'aggiornamento dell'ordine e/o errori
