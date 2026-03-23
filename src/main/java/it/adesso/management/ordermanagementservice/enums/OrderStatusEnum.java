@@ -12,7 +12,8 @@ public enum OrderStatusEnum {
     PAYED("PAYED"),
     UNDER_PAYMENT("UNDER_PAYMENT"),
     ACQUIRED("ACQUIRED"),
-    UNDER_EDITING("UNDER_EDITING");
+    UNDER_EDITING("UNDER_EDITING"),
+    CREATED("CREATED");
 
     private final String name;
 }

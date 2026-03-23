@@ -7,9 +7,7 @@ import it.adesso.management.ordermanagementservice.DTOs.SendingEventDTO;
 import it.adesso.management.ordermanagementservice.DTOs.external.anagservice.BaseDTO;
 import it.adesso.management.ordermanagementservice.DTOs.external.anagservice.IngredientDTO;
 import it.adesso.management.ordermanagementservice.DTOs.external.anagservice.PizzaDTO;
-import it.adesso.management.ordermanagementservice.entities.external.Basis;
-import it.adesso.management.ordermanagementservice.entities.external.ComposedPizza;
-import it.adesso.management.ordermanagementservice.entities.external.Ingredient;
+import it.adesso.management.ordermanagementservice.entities.external.*;
 import it.adesso.management.ordermanagementservice.entities.orders.*;
 import it.adesso.management.ordermanagementservice.enums.OrderSendingEventEnum;
 import it.adesso.management.ordermanagementservice.enums.OrderStatusEnum;
@@ -22,6 +20,7 @@ import it.adesso.management.ordermanagementservice.repositories.OrderRepository;
 import it.adesso.management.ordermanagementservice.repositories.external.BasisRepository;
 import it.adesso.management.ordermanagementservice.repositories.external.ComposedPizzaRepository;
 import it.adesso.management.ordermanagementservice.repositories.external.IngredientRepository;
+import it.adesso.management.ordermanagementservice.repositories.external.PizzaIngredientsRepository;
 import it.adesso.management.ordermanagementservice.services.JwtUtilService;
 import it.adesso.management.ordermanagementservice.services.OrderService;
 import it.adesso.management.ordermanagementservice.services.QueueService;
@@ -36,6 +35,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -59,6 +59,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderEntryRepository orderEntryRepository;
     private final OrderEntryAddedIngredientsRepository orderEntryAddedIngredientsRepository;
     private final OrderEntryRemovedIngredientsRepository orderEntryRemovedIngredientsRepository;
+    private final PizzaIngredientsRepository pizzaIngredientsRepository;
 
     @Override
     public Page<OrderBffDTO> findPendingOrders(Pageable pageable) {
@@ -101,9 +102,11 @@ public class OrderServiceImpl implements OrderService {
     public void createOrder(Long extenalId, OrderDTO orderDTO) {
 
         Order order = Order.builder()
-                .externalId(extenalId)
-                .placedBy(this.jwtUtilService.getUserIdentifier())
-                .build();
+            .externalId(extenalId)
+            .createdAt(Instant.now())
+            .status(OrderStatusEnum.CREATED.getName())
+            .placedBy(this.jwtUtilService.getUserIdentifier())
+            .build();
         this.orderRepository.save(order);
 
         //ora bisogna salvare tutte le entry dell'ordine
@@ -295,11 +298,25 @@ public class OrderServiceImpl implements OrderService {
         ComposedPizza composedPizza = composedPizzaRepository.findById(pizzaId).orElse(null);
         // se ancora nessuno l'aveva ordinata la inseriamo compresa di base
         if (composedPizza == null) {
-            Basis base = this.findBaseById(pizza.getBaseDTO().getId());
+            Basis base = this.findBaseById(pizza.getBase().getId());
             composedPizza = ComposedPizza.builder()
                     .id(pizza.getId())
                     .name(pizza.getName()).base(base).build();
             this.composedPizzaRepository.save(composedPizza);
+        }
+        if (pizza.getIngredients() != null && !pizza.getIngredients().isEmpty()) {
+            if (composedPizza.getIngredients() != null) {
+                this.pizzaIngredientsRepository.deleteAll(composedPizza.getIngredients());
+            }
+            for(IngredientDTO ingredientDTO: pizza.getIngredients()) {
+                Ingredient ingredient = this.findIngredientById(ingredientDTO.getId());
+                PizzaIngredient pi = PizzaIngredient.builder()
+                    .id(PizzaIngredientId.builder().pizza(pizza.getId()).ingredient(ingredient.getId()).build())
+                    .pizza(composedPizza)
+                    .ingredient(ingredient)
+                    .build();
+                this.pizzaIngredientsRepository.save(pi);
+            }
         }
         return composedPizza;
     }

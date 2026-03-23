@@ -26,7 +26,7 @@ public class Order {
     private Long externalId;
 
     @NotNull
-    @Column(name = "placed_by", nullable = false)
+    @Column(name = "placed_by", nullable = true)
     private String placedBy;
 
     @NotNull
@@ -40,7 +40,6 @@ public class Order {
     private Set<OrderEntry> entries;
 
     @NotNull
-    @ColumnDefault("now()")
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 

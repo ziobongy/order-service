@@ -281,7 +281,7 @@ class OrderServiceImplTest {
         pizzaDTO.setId(1L);
         pizzaDTO.setName("Margherita");
         BaseDTO baseDTO = new BaseDTO(1L, "Base");
-        pizzaDTO.setBaseDTO(baseDTO);
+        pizzaDTO.setBase(baseDTO);
         when(anagService.findById(1L)).thenReturn(pizzaDTO);
         when(anagService.findBaseById(1L)).thenReturn(baseDTO);
         Basis basis = Basis.builder().id(1L).name("Base").build();

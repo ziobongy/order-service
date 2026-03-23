@@ -12,6 +12,7 @@ class OrderStatusEnumTest {
         assertNotNull(OrderStatusEnum.UNDER_PAYMENT);
         assertNotNull(OrderStatusEnum.ACQUIRED);
         assertNotNull(OrderStatusEnum.UNDER_EDITING);
+        assertNotNull(OrderStatusEnum.CREATED);
     }
     @Test
     void testOrderStatusEnumNames() {
@@ -33,9 +34,9 @@ class OrderStatusEnumTest {
     }
     @Test
     void testOrderStatusEnumValues_Count() {
-        // Assert there are 7 enum values
+        // Assert there are 8 enum values
         OrderStatusEnum[] values = OrderStatusEnum.values();
-        assertEquals(7, values.length);
+        assertEquals(8, values.length);
     }
     @Test
     void testOrderStatusEnumGetter() {

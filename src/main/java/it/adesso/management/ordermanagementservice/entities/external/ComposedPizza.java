@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+import java.util.Set;
+
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -24,5 +26,7 @@ public class ComposedPizza {
     @JoinColumn(name = "base")
     private Basis base;
 
+    @OneToMany(mappedBy = "pizza")
+    private Set<PizzaIngredient>  ingredients;
 
 }

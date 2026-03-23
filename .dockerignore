@@ -1,0 +1,7 @@
+.env-local
+.gitattributes
+.git
+.idea
+.mvn
+target
+.gitignore

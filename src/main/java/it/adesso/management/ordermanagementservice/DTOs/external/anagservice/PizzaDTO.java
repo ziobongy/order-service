@@ -2,6 +2,8 @@ package it.adesso.management.ordermanagementservice.DTOs.external.anagservice;
 
 import lombok.*;
 
+import java.util.List;
+
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -10,5 +12,6 @@ import lombok.*;
 public class PizzaDTO {
     private Long id;
     private String name;
-    private BaseDTO baseDTO;
+    private BaseDTO base;
+    private List<IngredientDTO> ingredients;
 }
